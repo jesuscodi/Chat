@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat con Nombre</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+        #chat, #login {
+            width: 400px;
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0px 2px 6px rgba(0,0,0,0.2);
+        }
+        #mensajes {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+            padding: 5px;
+        }
+        .mensaje {
+            margin-bottom: 5px;
+        }
+        button {
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="login">
+        <h2>Bienvenido al Chat</h2>
+        <input type="text" id="nombre" placeholder="Ingresa tu nombre">
+        <button onclick="entrarChat()">Entrar</button>
+    </div>
+
+    <div id="chat" style="display:none;">
+        <div id="mensajes"></div>
+        <input type="text" id="mensaje" placeholder="Escribe un mensaje..." 
+               onkeypress="if(event.key==='Enter'){enviarMensaje();}">
+        <button onclick="enviarMensaje()">Enviar</button>
+        <button onclick="descargarHistorial()">📥 Descargar historial</button>
+    </div>
+
+<script>
+let usuario = "";
+let historial = [];
+
+// Cargar historial de localStorage
+if (localStorage.getItem("chatHistorial")) {
+    historial = JSON.parse(localStorage.getItem("chatHistorial"));
+}
+
+function mostrarHistorial() {
+    let contenedor = document.getElementById("mensajes");
+    contenedor.innerHTML = historial.map(m => `<div class='mensaje'>${m}</div>`).join("");
+    contenedor.scrollTop = contenedor.scrollHeight;
+}
+
+function entrarChat() {
+    usuario = document.getElementById("nombre").value.trim();
+    if (usuario === "") {
+        alert("Por favor ingresa tu nombre");
+        return;
+    }
+    document.getElementById("login").style.display = "none";
+    document.getElementById("chat").style.display = "block";
+    mostrarHistorial();
+}
+
+function enviarMensaje() {
+    let mensaje = document.getElementById("mensaje").value.trim();
+    if (mensaje === "") return;
+
+    let mensajeCompleto = `${usuario}: ${mensaje}`;
+    historial.push(mensajeCompleto);
+
+    // Guardar en localStorage
+    localStorage.setItem("chatHistorial", JSON.stringify(historial));
+
+    mostrarHistorial();
+    document.getElementById("mensaje").value = "";
+}
+
+function descargarHistorial() {
+    let blob = new Blob([historial.join("\n")], { type: "text/plain" });
+    let enlace = document.createElement("a");
+    enlace.href = URL.createObjectURL(blob);
+    enlace.download = "historial.txt";
+    enlace.click();
+}
+</script>
+
+</body>
+</html>
